@@ -29,7 +29,11 @@ st.caption(
 )
 
 with st.sidebar:
-    st.page_link("streamlit_app.py", label="← Back to extraction chat", icon="◈")
+    try:
+        st.page_link("streamlit_app.py", label="◈ Back to extraction chat")
+    except Exception:
+        # Sidebar auto-navigation still covers this if link resolution fails.
+        pass
     st.divider()
     st.caption(
         "Anomaly ≠ confirmed malicious. Findings are leads ranked by severity, "
