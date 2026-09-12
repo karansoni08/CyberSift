@@ -23,6 +23,21 @@ class CategoryResult(BaseModel):
     error: str | None = None
 
 
+class ChatMessage(BaseModel):
+    role: str  # "user" | "assistant"
+    content: str
+
+
+class ChatDocument(BaseModel):
+    filename: str | None = None
+    text: str
+
+
+class ChatRequest(BaseModel):
+    messages: list[ChatMessage]
+    document: ChatDocument | None = None
+
+
 class ExtractionResponse(BaseModel):
     filename: str | None = None
     format_used: str | None = None

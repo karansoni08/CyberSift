@@ -9,25 +9,38 @@ import tempfile
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 
+from app.core.agent import run_chat
 from app.core.pipeline import build_summary, run_extraction
 from app.core.registry import get_extractors, get_loader, supported_categories, supported_formats
-from app.schemas.models import ExtractionResponse
+from app.schemas.models import ChatRequest, ExtractionResponse
 
 MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 
 app = FastAPI(title="CyberSift")
 
+# The Streamlit frontend calls the API server-side (via requests), so CORS
+# only matters for browser-based clients; keep it open for simple tooling.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://cybersift.vercel.app",
-        "https://cybersift-karansoni.vercel.app",
-    ],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/", response_class=HTMLResponse)
+def root():
+    return (
+        "<html><body style='font-family: system-ui; max-width: 640px; margin: 60px auto;'>"
+        "<h1>&#9672; CyberSift API</h1>"
+        "<p>This is the CyberSift backend. The UI is a Streamlit app &mdash; run "
+        "<code>streamlit run frontend/streamlit_app.py</code> from the repo.</p>"
+        "<p>Endpoints: <a href='/api/health'>/api/health</a>, POST /api/ingest, "
+        "POST /api/extract, POST /api/chat. Docs: <a href='/docs'>/docs</a>.</p>"
+        "</body></html>"
+    )
 
 
 @app.get("/api/health")
@@ -120,3 +133,18 @@ async def extract(
         summary=build_summary(findings, selected, errors),
         errors=errors,
     )
+
+
+@app.post("/api/chat")
+async def chat(body: ChatRequest):
+    """One turn of the tool-using chat agent."""
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        raise HTTPException(
+            status_code=503,
+            detail="The server has no ANTHROPIC_API_KEY configured, so the chat "
+            "agent cannot run.",
+        )
+    if not body.messages or body.messages[-1].role != "user":
+        raise HTTPException(status_code=400, detail="The last message must be from the user.")
+    document = body.document.model_dump() if body.document else None
+    return await run_chat([m.model_dump() for m in body.messages], document)

@@ -24,7 +24,7 @@ def get_model() -> str:
     return os.environ.get("CYBERSIFT_MODEL", DEFAULT_MODEL)
 
 
-def _get_client() -> AsyncAnthropic:
+def get_async_client() -> AsyncAnthropic:
     global _client
     if _client is None:
         if not os.environ.get("ANTHROPIC_API_KEY"):
@@ -82,7 +82,7 @@ def parse_json_array(raw: str) -> list[dict]:
 
 async def extract_from_chunk(system_prompt: str, chunk: str) -> list[dict]:
     """Run one extraction call: one category prompt over one text chunk."""
-    client = _get_client()
+    client = get_async_client()
     async with _get_semaphore():
         response = await client.messages.create(
             model=get_model(),
