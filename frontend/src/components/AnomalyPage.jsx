@@ -9,7 +9,7 @@ const SEVERITY_META = {
 
 const ORDER = { high: 0, medium: 1, low: 2 };
 
-export default function AnomalyPage() {
+export default function AnomalyPage({ onBack }) {
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -38,6 +38,10 @@ export default function AnomalyPage() {
 
   return (
     <main className="chat-window anomaly-page">
+      <div className="top-bar anomaly-top-bar">
+        <span className="chips-label">Anomaly Detection</span>
+        <button className="anomaly-top-btn" onClick={onBack}>◈ Back to chat</button>
+      </div>
       <div className="anomaly-header">
         <h1>🔍 Anomaly Detection</h1>
         <p>

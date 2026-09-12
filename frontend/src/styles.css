@@ -637,3 +637,41 @@ body {
   font-size: 11px;
   color: var(--text-dim);
 }
+
+/* ---------- Top bar ---------- */
+.top-bar {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-raised);
+  padding-right: 20px;
+}
+
+.top-bar .category-chips {
+  border-bottom: none;
+  background: none;
+  flex: 1;
+}
+
+.anomaly-top-bar {
+  padding: 12px 20px;
+  justify-content: space-between;
+  margin: -28px -36px 20px;
+}
+
+.anomaly-top-btn {
+  background: transparent;
+  color: #e08a3c;
+  border: 1px solid #e08a3c;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  margin-left: auto;
+}
+
+.anomaly-top-btn:hover {
+  background: rgba(224, 138, 60, 0.15);
+}

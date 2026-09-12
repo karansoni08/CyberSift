@@ -3,7 +3,7 @@ import CategorySelector from "./CategorySelector.jsx";
 import ChatInputBar from "./ChatInputBar.jsx";
 import MessageBubble from "./MessageBubble.jsx";
 
-export default function ChatWindow({ conversation, selectedCategories, onToggleCategory, onSend, busy }) {
+export default function ChatWindow({ conversation, selectedCategories, onToggleCategory, onSend, busy, onOpenAnomaly }) {
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -12,7 +12,12 @@ export default function ChatWindow({ conversation, selectedCategories, onToggleC
 
   return (
     <main className="chat-window">
-      <CategorySelector selected={selectedCategories} onToggle={onToggleCategory} />
+      <div className="top-bar">
+        <CategorySelector selected={selectedCategories} onToggle={onToggleCategory} />
+        <button className="anomaly-top-btn" onClick={onOpenAnomaly} title="Detect the unknown: scan any data for anomalies">
+          🔍 Anomaly Detection
+        </button>
+      </div>
 
       <div className="messages">
         {!conversation && (

@@ -8,8 +8,6 @@ export default function Sidebar({
   onSelectConversation,
   onNewAnalysis,
   onDeleteConversation,
-  anomalyActive,
-  onOpenAnomaly,
 }) {
   const visible = conversations.filter((c) => c.category === activeTab);
 
@@ -33,13 +31,6 @@ export default function Sidebar({
             {cat.label}
           </button>
         ))}
-        <button
-          className={"sidebar-tab anomaly-tab" + (anomalyActive ? " active" : "")}
-          style={anomalyActive ? { "--tab-color": "#e08a3c" } : undefined}
-          onClick={onOpenAnomaly}
-        >
-          🔍 Anomaly Detection
-        </button>
       </nav>
 
       <div className="conversation-list">

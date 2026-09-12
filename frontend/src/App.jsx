@@ -132,11 +132,9 @@ export default function App() {
           setActiveConversationId(null);
         }}
         onDeleteConversation={deleteConversation}
-        anomalyActive={view === "anomaly"}
-        onOpenAnomaly={() => setView("anomaly")}
       />
       {view === "anomaly" ? (
-        <AnomalyPage />
+        <AnomalyPage onBack={() => setView("chat")} />
       ) : (
         <ChatWindow
           conversation={conversation}
@@ -144,6 +142,7 @@ export default function App() {
           onToggleCategory={toggleCategory}
           onSend={send}
           busy={busy}
+          onOpenAnomaly={() => setView("anomaly")}
         />
       )}
     </div>
