@@ -1,11 +1,11 @@
 {
-  "buildCommand": "",
-  "outputDirectory": ".",
+  "buildCommand": "cd frontend && npm install && npm run build",
+  "outputDirectory": "frontend/dist",
   "functions": {
     "api/index.py": { "maxDuration": 300 }
   },
   "rewrites": [
-    { "source": "/", "destination": "/api/index" },
-    { "source": "/(.*)", "destination": "/api/index" }
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
