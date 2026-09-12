@@ -9,6 +9,40 @@ const SEVERITY_META = {
 
 const ORDER = { high: 0, medium: 1, low: 2 };
 
+function NoveltyBadge({ f }) {
+  if (f.novel === true) return <span className="novelty-badge new">🆕 first time seen</span>;
+  if (f.novel === false)
+    return (
+      <span className="novelty-badge known">
+        seen in {f.times_seen} previous scan{f.times_seen === 1 ? "" : "s"}
+      </span>
+    );
+  return null;
+}
+
+function AnomalyCard({ f, open }) {
+  const meta = SEVERITY_META[f.severity] || { label: "Unrated", icon: "⚪", blurb: "" };
+  return (
+    <details className={"finding-card severity-" + (f.severity || "none")} open={open}>
+      <summary className="finding-row">
+        <span className="severity-tag">{meta.icon} {meta.label}</span>
+        <span className="subtype-label">{f.subtype}</span>
+        <code className="finding-value">{f.value}</code>
+        <NoveltyBadge f={f} />
+        <span className="confidence-badge">{Math.round(f.confidence * 100)}%</span>
+      </summary>
+      <div className="finding-details">
+        <div><span className="detail-label">Why it's anomalous:</span> {f.reasoning}</div>
+        <div><span className="detail-label">Evidence in your data:</span> <code>{f.original_form}</code></div>
+        {f.novel === false && f.first_seen && (
+          <div><span className="detail-label">Corpus history:</span> first seen {f.first_seen.slice(0, 10)}, in {f.times_seen} previous scan{f.times_seen === 1 ? "" : "s"}</div>
+        )}
+        {meta.blurb && <div><span className="detail-label">Severity meaning:</span> {meta.blurb}</div>}
+      </div>
+    </details>
+  );
+}
+
 export default function AnomalyPage({ onBack }) {
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
@@ -103,26 +137,23 @@ export default function AnomalyPage({ onBack }) {
                 <span>🔴 High: {counts.high}</span>
                 <span>🟠 Medium: {counts.medium}</span>
                 <span>🟡 Low: {counts.low}</span>
+                <span>🆕 Never seen before: {findings.filter((f) => f.novel === true).length}</span>
                 <span>Analyzed: {result.characters.toLocaleString()} chars</span>
+                {result.corpus && <span>Corpus memory: {result.corpus.scans} prior scan{result.corpus.scans === 1 ? "" : "s"}, {result.corpus.known_values} known values</span>}
               </div>
-              {findings.map((f, i) => {
-                const meta = SEVERITY_META[f.severity] || { label: "Unrated", icon: "⚪", blurb: "" };
-                return (
-                  <details key={i} className={"finding-card severity-" + (f.severity || "none")} open={f.severity === "high"}>
-                    <summary className="finding-row">
-                      <span className="severity-tag">{meta.icon} {meta.label}</span>
-                      <span className="subtype-label">{f.subtype}</span>
-                      <code className="finding-value">{f.value}</code>
-                      <span className="confidence-badge">{Math.round(f.confidence * 100)}%</span>
-                    </summary>
-                    <div className="finding-details">
-                      <div><span className="detail-label">Why it's anomalous:</span> {f.reasoning}</div>
-                      <div><span className="detail-label">Evidence in your data:</span> <code>{f.original_form}</code></div>
-                      {meta.blurb && <div><span className="detail-label">Severity meaning:</span> {meta.blurb}</div>}
-                    </div>
-                  </details>
-                );
-              })}
+              {findings.filter((f) => f.severity !== "low").map((f, i) => (
+                <AnomalyCard key={i} f={f} open={f.severity === "high"} />
+              ))}
+              {counts.low > 0 && (
+                <details className="low-group">
+                  <summary className="low-group-summary">
+                    🟡 {counts.low} low-severity oddit{counts.low === 1 ? "y" : "ies"} (collapsed — click to review)
+                  </summary>
+                  {findings.filter((f) => f.severity === "low").map((f, i) => (
+                    <AnomalyCard key={i} f={f} open={false} />
+                  ))}
+                </details>
+              )}
               <button
                 className="scan-btn secondary"
                 onClick={() => {

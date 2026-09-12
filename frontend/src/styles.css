@@ -675,3 +675,35 @@ body {
 .anomaly-top-btn:hover {
   background: rgba(224, 138, 60, 0.15);
 }
+
+/* ---------- Layer 2: novelty + low-severity grouping ---------- */
+.novelty-badge {
+  font-size: 11px;
+  border-radius: 6px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+
+.novelty-badge.new {
+  color: #4d9de0;
+  border: 1px solid #4d9de0;
+}
+
+.novelty-badge.known {
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+}
+
+.low-group {
+  margin-top: 10px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+
+.low-group-summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-dim);
+  padding: 8px 4px;
+}

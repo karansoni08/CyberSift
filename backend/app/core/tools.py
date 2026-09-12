@@ -68,12 +68,13 @@ async def _extract_security_data(document: dict | None, tool_input: dict) -> dic
     extractors = get_extractors(tool_input.get("categories", []))
     if not extractors:
         return {"error": "No valid categories requested."}
-    findings, errors, chunks = await run_extraction(document["text"], extractors)
+    findings, errors, chunks, corpus_stats = await run_extraction(document["text"], extractors, source=document.get("filename"))
     selected = [ex.category_id for ex in extractors]
     return {
         "summary": build_summary(findings, selected, errors),
         "chunks_processed": chunks,
         "errors": errors,
+        "corpus": corpus_stats,
         "findings": [f.model_dump() for f in findings],
     }
 

@@ -50,3 +50,6 @@ CYBERSIFT_API_URL=http://localhost:8000 streamlit run frontend/streamlit_app.py 
 - Backend: Python, FastAPI, Anthropic API (Claude Sonnet 5 by default; override with `CYBERSIFT_MODEL`)
 - Frontend: Streamlit
 - Guardrail: every finding's `original_form` must appear verbatim in the source text or it is discarded
+- Corpus memory (Layer 2): every scan's findings are recorded (as HMAC digests only -- no raw
+  values leave the server) in Vercel Blob storage; findings come back annotated with novelty
+  ("first time seen" vs "seen in N previous scans") and same-entity anomaly findings are merged

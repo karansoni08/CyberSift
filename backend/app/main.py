@@ -121,7 +121,7 @@ async def extract(
     if not document.strip():
         raise HTTPException(status_code=400, detail="Attach a file or paste some text to analyze.")
 
-    findings, errors, chunk_count = await run_extraction(document, extractors)
+    findings, errors, chunk_count, corpus_stats = await run_extraction(document, extractors, source=filename)
     selected = [ex.category_id for ex in extractors]
     return ExtractionResponse(
         filename=filename,
@@ -132,6 +132,7 @@ async def extract(
         findings=findings,
         summary=build_summary(findings, selected, errors),
         errors=errors,
+        corpus=corpus_stats or None,
     )
 
 

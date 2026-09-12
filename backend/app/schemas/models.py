@@ -16,6 +16,10 @@ class Finding(BaseModel):
     reasoning: str = ""
     severity: str | None = None  # anomaly category only: high | medium | low
     verified: bool = True
+    # Layer 2 novelty (None until a corpus lookup has run)
+    novel: bool | None = None
+    times_seen: int | None = None  # prior scans this value appeared in
+    first_seen: str | None = None
 
 
 class CategoryResult(BaseModel):
@@ -48,3 +52,4 @@ class ExtractionResponse(BaseModel):
     findings: list[Finding]
     summary: str
     errors: list[str] = []
+    corpus: dict | None = None  # {"scans": int, "known_values": int}

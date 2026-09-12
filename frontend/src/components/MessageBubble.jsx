@@ -23,6 +23,8 @@ function FindingsBlock({ findings }) {
             <details key={i} className="finding-card">
               <summary className="finding-row">
                 <code className="finding-value">{f.value}</code>
+                {f.novel === true && <span className="novelty-badge new">🆕</span>}
+                {f.novel === false && <span className="novelty-badge known">{f.times_seen}× before</span>}
                 <ConfidenceBadge value={f.confidence} />
               </summary>
               <div className="finding-details">
