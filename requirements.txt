@@ -3,7 +3,5 @@ uvicorn
 anthropic
 pdfplumber
 python-docx
-openpyxl
 python-multipart
-sqlalchemy
 pydantic

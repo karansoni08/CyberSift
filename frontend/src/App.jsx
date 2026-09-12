@@ -1,68 +1,95 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "./components/Sidebar.jsx";
 import ChatWindow from "./components/ChatWindow.jsx";
+import { extract } from "./api/client.js";
 
-// Static demo data so the deployed shell shows what a finished conversation
-// will look like. Replaced by real API data in Phases 9–13.
-const DEMO_CONVERSATIONS = [
-  {
-    id: "demo-1",
-    category: "ioc",
-    title: "Phishing campaign report (demo)",
-    date: "Preview",
-    messages: [
-      {
-        role: "user",
-        text: "Extract the IOCs from this incident report.",
-        attachment: "incident-report.pdf",
-      },
-      {
-        role: "bot",
-        text: "Sample of how extracted findings will be rendered (demo data):",
-        findings: [
-          {
-            value: "192.168.24.7",
-            original_form: "192[.]168[.]24[.]7",
-            subtype: "ip",
-            confidence: 0.97,
-            reasoning: "Defanged IPv4 address listed as a C2 callback in the report.",
-          },
-          {
-            value: "http://malware-drop.example.com/stage2",
-            original_form: "hxxp://malware-drop[.]example[.]com/stage2",
-            subtype: "url",
-            confidence: 0.94,
-            reasoning: "Defanged URL described as the second-stage payload location.",
-          },
-          {
-            value: "d41d8cd98f00b204e9800998ecf8427e",
-            original_form: "d41d8cd98f00b204e9800998ecf8427e",
-            subtype: "file_hash",
-            confidence: 0.88,
-            reasoning: "32-character hex string labeled as the dropper's MD5 hash.",
-          },
-          {
-            value: "CVE-2024-21412",
-            original_form: "CVE-2024-21412",
-            subtype: "cve",
-            confidence: 0.99,
-            reasoning: "CVE identifier cited as the exploited vulnerability.",
-          },
-        ],
-      },
-    ],
-  },
-];
+const STORAGE_KEY = "cybersift.conversations.v1";
+
+function loadConversations() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveConversations(conversations) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+  } catch {
+    // storage unavailable (private window, quota) — conversations just won't persist
+  }
+}
 
 export default function App() {
+  const [conversations, setConversations] = useState(loadConversations);
   const [activeTab, setActiveTab] = useState("ioc");
-  const [activeConversationId, setActiveConversationId] = useState("demo-1");
+  const [activeConversationId, setActiveConversationId] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState(["ioc"]);
+  const [busy, setBusy] = useState(false);
 
-  const conversation = DEMO_CONVERSATIONS.find((c) => c.id === activeConversationId) || null;
+  useEffect(() => saveConversations(conversations), [conversations]);
+
+  const conversation = conversations.find((c) => c.id === activeConversationId) || null;
 
   const toggleCategory = (id) =>
     setSelectedCategories((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
+
+  const newAnalysis = () => setActiveConversationId(null);
+
+  const appendMessage = (convId, message) =>
+    setConversations((prev) =>
+      prev.map((c) => (c.id === convId ? { ...c, messages: [...c.messages, message] } : c))
+    );
+
+  const send = async ({ text, file, format }) => {
+    if (busy) return;
+    const categories = selectedCategories.length ? selectedCategories : [activeTab];
+
+    let convId = activeConversationId;
+    if (!convId) {
+      convId = "conv-" + Date.now();
+      const title = file ? file.name : text.slice(0, 60) || "New analysis";
+      const conv = {
+        id: convId,
+        category: categories[0],
+        title,
+        date: new Date().toLocaleDateString(),
+        messages: [],
+      };
+      setConversations((prev) => [conv, ...prev]);
+      setActiveTab(categories[0]);
+      setActiveConversationId(convId);
+    }
+
+    appendMessage(convId, {
+      role: "user",
+      text: text || (file ? "Extract from this file." : ""),
+      attachment: file ? file.name : undefined,
+    });
+
+    setBusy(true);
+    try {
+      const result = await extract({ text, file, categories, format });
+      appendMessage(convId, {
+        role: "bot",
+        text: result.summary,
+        findings: result.findings,
+        errors: result.errors,
+      });
+    } catch (err) {
+      appendMessage(convId, { role: "bot", error: err.message });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const deleteConversation = (id) => {
+    setConversations((prev) => prev.filter((c) => c.id !== id));
+    if (id === activeConversationId) setActiveConversationId(null);
+  };
 
   return (
     <div className="app-layout">
@@ -72,14 +99,18 @@ export default function App() {
           setActiveTab(tab);
           setActiveConversationId(null);
         }}
-        conversations={DEMO_CONVERSATIONS}
+        conversations={conversations}
         activeConversationId={activeConversationId}
         onSelectConversation={setActiveConversationId}
+        onNewAnalysis={newAnalysis}
+        onDeleteConversation={deleteConversation}
       />
       <ChatWindow
         conversation={conversation}
         selectedCategories={selectedCategories}
         onToggleCategory={toggleCategory}
+        onSend={send}
+        busy={busy}
       />
     </div>
   );

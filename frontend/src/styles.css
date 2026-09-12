@@ -108,12 +108,38 @@ body {
 }
 
 .conversation-item {
-  text-align: left;
-  background: none;
+  display: flex;
+  align-items: center;
   border: 1px solid transparent;
   border-radius: 8px;
+}
+
+.conversation-select {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: none;
+  border: none;
   padding: 10px;
   cursor: pointer;
+  color: var(--text);
+}
+
+.conversation-delete {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 6px 8px;
+  visibility: hidden;
+}
+
+.conversation-item:hover .conversation-delete {
+  visibility: visible;
+}
+
+.conversation-delete:hover {
   color: var(--text);
 }
 
@@ -365,13 +391,72 @@ body {
 }
 
 /* ---------- Chat input bar ---------- */
+.chat-input-area {
+  border-top: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+
+.pending-attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 20px 0;
+  padding: 5px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.remove-attachment {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 0 2px;
+}
+
+.remove-attachment:hover {
+  color: var(--text);
+}
+
+.message-error {
+  color: #e05d5d;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.message-bubble.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .chat-input-bar {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 14px 20px;
-  border-top: 1px solid var(--border);
-  background: var(--bg-raised);
 }
 
 .format-select {

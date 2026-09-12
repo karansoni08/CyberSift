@@ -4,10 +4,11 @@ function ConfidenceBadge({ value }) {
 }
 
 function FindingsBlock({ findings }) {
-  // Group generically by subtype — no category-specific logic here.
+  // Group generically by category + subtype — no category-specific logic here.
   const groups = {};
   for (const f of findings) {
-    (groups[f.subtype] = groups[f.subtype] || []).push(f);
+    const key = f.category ? `${f.category} · ${f.subtype}` : f.subtype;
+    (groups[key] = groups[key] || []).push(f);
   }
 
   return (
@@ -48,7 +49,13 @@ export default function MessageBubble({ message }) {
       <div className={"message-bubble " + message.role}>
         {message.attachment && <div className="attachment-chip">📄 {message.attachment}</div>}
         {message.text && <div className="message-text">{message.text}</div>}
-        {message.findings && <FindingsBlock findings={message.findings} />}
+        {message.error && <div className="message-error">⚠ {message.error}</div>}
+        {message.findings && message.findings.length > 0 && <FindingsBlock findings={message.findings} />}
+        {message.errors && message.errors.length > 0 && (
+          <div className="message-error">{message.errors.map((e, i) => (
+            <div key={i}>⚠ {e}</div>
+          ))}</div>
+        )}
       </div>
     </div>
   );
