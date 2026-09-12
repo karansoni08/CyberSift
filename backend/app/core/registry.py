@@ -5,6 +5,7 @@ when a new category or file format is added (one import + one list entry).
 
 import os
 
+from app.extractors.anomaly_extractor import AnomalyExtractor
 from app.extractors.credentials_extractor import CredentialsExtractor
 from app.extractors.forensic_extractor import ForensicExtractor
 from app.extractors.ioc_extractor import IocExtractor
@@ -21,6 +22,7 @@ EXTRACTORS = [
     CredentialsExtractor(),
     NetworkExtractor(),
     ForensicExtractor(),
+    AnomalyExtractor(),
 ]
 
 

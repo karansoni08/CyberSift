@@ -14,6 +14,7 @@ class Finding(BaseModel):
     original_form: str
     confidence: float = Field(ge=0.0, le=1.0)
     reasoning: str = ""
+    severity: str | None = None  # anomaly category only: high | medium | low
     verified: bool = True
 
 

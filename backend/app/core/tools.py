@@ -29,7 +29,7 @@ TOOL_DEFINITIONS = [
                     "type": "array",
                     "items": {
                         "type": "string",
-                        "enum": ["ioc", "pii", "creds", "network", "forensic"],
+                        "enum": ["ioc", "pii", "creds", "network", "forensic", "anomaly"],
                     },
                     "description": "Which extraction categories to run.",
                 }

@@ -9,13 +9,11 @@ Point at a different backend with:  CYBERSIFT_API_URL=http://localhost:8000
 """
 
 import json
-import os
 
 import pandas as pd
-import requests
 import streamlit as st
 
-API_URL = os.environ.get("CYBERSIFT_API_URL", "https://cybersift.vercel.app").rstrip("/")
+from common import API_URL, api_post
 
 CATEGORY_LABELS = {
     "ioc": "IOC",
@@ -31,20 +29,6 @@ if "messages" not in st.session_state:
     st.session_state.messages = []  # [{role, content, findings?, tool_calls?}]
 if "document" not in st.session_state:
     st.session_state.document = None  # {"filename", "text"}
-
-
-def api_post(path: str, timeout: int = 120, **kwargs):
-    try:
-        res = requests.post(f"{API_URL}{path}", timeout=timeout, **kwargs)
-    except requests.RequestException as exc:
-        raise RuntimeError(f"Could not reach the CyberSift API at {API_URL}: {exc}")
-    if not res.ok:
-        try:
-            detail = res.json().get("detail")
-        except Exception:
-            detail = None
-        raise RuntimeError(detail or f"API request failed ({res.status_code}).")
-    return res.json()
 
 
 def render_findings(findings: list[dict]):
@@ -109,6 +93,14 @@ with st.sidebar:
 # ---------- Chat ----------
 st.title("CyberSift")
 st.caption("Attach a report, then ask — e.g. *“extract the IOCs”*, *“run every category”*, *“any credentials in here?”*")
+
+# Category row — the first five run through the chat agent; Anomaly Detection
+# opens its own page for detecting the unknown in any data format.
+cols = st.columns([1, 1, 1.3, 1.1, 1.1, 2.2])
+for col, label in zip(cols, ["🔴 IOC", "🟡 PII", "🟣 Creds", "🔵 Network", "🟢 Forensic"]):
+    col.markdown(f"<div style='text-align:center; padding:6px; border:1px solid #444; border-radius:8px; font-size:13px'>{label}</div>", unsafe_allow_html=True)
+with cols[5]:
+    st.page_link("pages/Anomaly_Detection.py", label="🔍 Anomaly Detection", icon=None, use_container_width=True)
 
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"], avatar="◈" if msg["role"] == "assistant" else None):

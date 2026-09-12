@@ -37,6 +37,10 @@ def verify_findings(raw_items: list[dict], category_id: str, subtypes: tuple, ch
         except (TypeError, ValueError):
             confidence = 0.5
 
+        severity = str(item.get("severity", "")).strip().lower()
+        if severity not in ("high", "medium", "low"):
+            severity = None
+
         verified = _found_in(original, chunk, haystack_squashed) or _found_in(
             value, chunk, haystack_squashed
         )
@@ -51,6 +55,7 @@ def verify_findings(raw_items: list[dict], category_id: str, subtypes: tuple, ch
                 original_form=original,
                 confidence=confidence,
                 reasoning=str(item.get("reasoning", "")).strip(),
+                severity=severity,
                 verified=True,
             )
         )
