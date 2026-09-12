@@ -1,7 +1,3 @@
-fastapi
-uvicorn
-anthropic
-pdfplumber
-python-docx
-python-multipart
-pydantic
+streamlit
+requests
+pandas
